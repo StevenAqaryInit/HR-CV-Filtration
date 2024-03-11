@@ -11,6 +11,9 @@ from nltk.corpus import stopwords
 import string
 import io
 
+
+nltk.download('stopwords')
+
 titles = []
 count_matrix = []
 cos_similarity = []
