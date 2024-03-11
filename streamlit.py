@@ -13,6 +13,7 @@ import io
 
 
 nltk.download('stopwords')
+nltk.download('punkt')
 
 titles = []
 count_matrix = []
