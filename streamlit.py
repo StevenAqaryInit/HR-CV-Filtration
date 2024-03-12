@@ -166,25 +166,6 @@ except:
 
 
 
-# if st.button('Download'):
-#     try:
-#         # print(row['bytes'].values[0])
-#         # with open(row['title'].values[0], 'wb') as pdf_file:
-#         #     pdf_file.write(row['bytes'].values[0])
-
-#         for file in files:
-#             if file.name == record['title']:
-#                 with open(row['title'].values[0], 'wb') as save_file:
-#                     save_file.write(file.getbuffer())
-
-#         st.success('Saved...')
-#     except:
-#         pass
-
-
-
-
-
 
 
 
