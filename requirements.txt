@@ -18,4 +18,4 @@ pyreadline3==3.4.1
 pdfplumber==0.11.0
 pillow==10.2.0
 docx2txt==0.8
-
+docx==0.2.4
