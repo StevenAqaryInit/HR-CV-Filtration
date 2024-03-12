@@ -137,10 +137,6 @@ for cv in df.iloc[:, 0].values.tolist():
     
 df['scores'] = scores
 df['scores'] = df['scores'] * 100
-# st.dataframe(df[['title', 'scores']].sort_values(by='scores', ascending=False), width=1000, height=500)
-
-# print(df)
-# st.dataframe(df[['title', 'scores']].sort_values(by='scores', ascending=False).drop_duplicates())
 
 record = show(df[['bytes', 'title', 'scores']].sort_values(by='scores', ascending=False).drop_duplicates())
 try:
