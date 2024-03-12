@@ -28,30 +28,30 @@ vectorizer = CountVectorizer(stop_words='english')
 
 def show(df):
     # data = df.iloc[:, 1:]
-
-    gd = GridOptionsBuilder.from_dataframe(df.iloc[:, 1:])
-    gd.configure_selection(selection_mode='single'
-                           , use_checkbox=True)
-    grid_options = gd.build()
-
-    grid_table = AgGrid(df
-                        , gridOptions=grid_options
-                        , fit_columns_on_grid_load=True
-                        , reload_data=False
-                        , allow_unsafe_jscode=True)
-    
-    # print(grid_table['selected_rows'])
     try:
+        gd = GridOptionsBuilder.from_dataframe(df.iloc[:, 1:])
+        gd.configure_selection(selection_mode='single'
+                            , use_checkbox=True)
+        grid_options = gd.build()
+
+        grid_table = AgGrid(df
+                            , gridOptions=grid_options
+                            , fit_columns_on_grid_load=True
+                            , reload_data=False
+                            , allow_unsafe_jscode=True)
+        
         values = list(grid_table['selected_rows'][0].values())[1:]
         keys = list(grid_table['selected_rows'][0].keys())[1:]
     
         record = {}
         for key, value in zip(keys, values):
             record[key] = value
+
+        return record
     except:
         pass
 
-    return record
+    
 
 
 
@@ -143,8 +143,11 @@ df['scores'] = df['scores'] * 100
 # st.dataframe(df[['title', 'scores']].sort_values(by='scores', ascending=False).drop_duplicates())
 
 record = show(df[['bytes', 'title', 'scores']].sort_values(by='scores', ascending=False).drop_duplicates())
-row = df[df['title']==record['title']]
-print(row)
+try:
+    row = df[df['title']==record['title']]
+    print(row)
+except:
+        pass
 
 
 
@@ -162,6 +165,14 @@ if st.button('Download'):
         st.success('Saved...')
     except:
         pass
+
+
+
+
+
+
+
+
 
 
 
