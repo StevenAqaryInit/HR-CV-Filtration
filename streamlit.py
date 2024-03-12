@@ -150,21 +150,36 @@ except:
         pass
 
 
+try:
+    for file in files:
+        if file.name == record['title']:
+            st.download_button(
+                label="Download file",
+                data=bytes(file.getbuffer()),
+                file_name=row['title'].values[0],
+            )
+except:
+    pass
 
-if st.button('Download'):
-    try:
-        # print(row['bytes'].values[0])
-        # with open(row['title'].values[0], 'wb') as pdf_file:
-        #     pdf_file.write(row['bytes'].values[0])
 
-        for file in files:
-            if file.name == record['title']:
-                with open(row['title'].values[0], 'wb') as save_file:
-                    save_file.write(file.getbuffer())
 
-        st.success('Saved...')
-    except:
-        pass
+
+
+
+# if st.button('Download'):
+#     try:
+#         # print(row['bytes'].values[0])
+#         # with open(row['title'].values[0], 'wb') as pdf_file:
+#         #     pdf_file.write(row['bytes'].values[0])
+
+#         for file in files:
+#             if file.name == record['title']:
+#                 with open(row['title'].values[0], 'wb') as save_file:
+#                     save_file.write(file.getbuffer())
+
+#         st.success('Saved...')
+#     except:
+#         pass
 
 
 
