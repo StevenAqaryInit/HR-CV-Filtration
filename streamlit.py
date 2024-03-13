@@ -97,12 +97,12 @@ def get_files_content(files):
 
     for cv in files:
         print(cv.name)
-        if cv.name.split('.')[1] == 'pdf':
+        if cv.name.split('.')[-1] == 'pdf':
             pdf_file = io.BytesIO(cv.read())
             cleaned_text = read_pdf(pdf_file)
             files_bytes.append(pdf_file)
 
-        elif cv.name.split('.')[1] == 'docx' or cv.split('.')[1] == 'doc':
+        elif cv.name.split('.')[-1] == 'docx' or cv.split('.')[-1] == 'doc':
             docx_file = io.BytesIO(cv.read())
             cleaned_text = read_docx(docx_file)
             files_bytes.append(docx_file)
@@ -127,37 +127,38 @@ scores = []
 
 df = pd.DataFrame()
 
-# if st.button('Get Results'):
 df = get_files_content(files)
 clean_keywords = filter_text(keywords)
 
-for cv in df.iloc[:, 0].values.tolist():
-    matrix = vectorizer.fit_transform([cv, clean_keywords])
-    scores.append(cosine_similarity(matrix)[0][1]) 
+if clean_keywords != '':
+    for cv in df.iloc[:, 0].values.tolist():
+        matrix = vectorizer.fit_transform([cv, clean_keywords])
+        scores.append(cosine_similarity(matrix)[0][1]) 
+        
+    df['scores'] = scores
+    df['scores'] = df['scores'] * 100
     
-df['scores'] = scores
-df['scores'] = df['scores'] * 100
-
-record = show(df[['bytes', 'title', 'scores']].sort_values(by='scores', ascending=False).drop_duplicates())
-try:
-    row = df[df['title']==record['title']]
-    print(row)
-except:
+    record = show(df[['bytes', 'title', 'scores']].sort_values(by='scores', ascending=False).drop_duplicates())
+    try:
+        row = df[df['title']==record['title']]
+        print(row)
+    except:
+            pass
+    
+    
+    try:
+        for file in files:
+            if file.name == record['title']:
+                st.download_button(
+                    label="Download file",
+                    data=bytes(file.getbuffer()),
+                    file_name=row['title'].values[0],
+                )
+    except:
         pass
 
-
-try:
-    for file in files:
-        if file.name == record['title']:
-            st.download_button(
-                label="Download file",
-                data=bytes(file.getbuffer()),
-                file_name=row['title'].values[0],
-            )
-except:
-    pass
-
-
+else:
+    st.error('Enter some keywords...')
 
 
 
