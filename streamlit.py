@@ -38,7 +38,8 @@ def show(df):
                             , gridOptions=grid_options
                             , fit_columns_on_grid_load=True
                             , reload_data=False
-                            , allow_unsafe_jscode=True)
+                            , allow_unsafe_jscode=True
+                           , height=500)
         
         values = list(grid_table['selected_rows'][0].values())[1:]
         keys = list(grid_table['selected_rows'][0].keys())[1:]
