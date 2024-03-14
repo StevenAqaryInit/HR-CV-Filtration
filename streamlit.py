@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import PyPDF2
@@ -9,7 +10,7 @@ import string
 import io
 from docx import Document
 import nltk
-
+import concurrent.futures
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid import AgGrid
 
@@ -39,7 +40,7 @@ def show(df):
                             , fit_columns_on_grid_load=True
                             , reload_data=False
                             , allow_unsafe_jscode=True
-                           , height=500)
+                            , height=500)
         
         values = list(grid_table['selected_rows'][0].values())[1:]
         keys = list(grid_table['selected_rows'][0].keys())[1:]
@@ -53,9 +54,6 @@ def show(df):
         pass
 
     
-
-
-
 
 def filter_text(text_content):
     tokens = word_tokenize(text_content)
@@ -92,26 +90,34 @@ def read_pdf(file):
 
 
 
-def get_files_content(files):
+def get_files_content(cv):
+    print(cv)
+    if cv.name.split('.')[-1] == 'pdf':
+        bytes_file = io.BytesIO(cv.read())
+        cleaned_text = read_pdf(bytes_file)
+
+    elif cv.name.split('.')[-1] == 'docx' or cv.split('.')[-1] == 'doc':
+        bytes_file = io.BytesIO(cv.read())
+        cleaned_text = read_docx(bytes_file)
+
+    return cleaned_text, bytes_file
+
+    
+
+
+def run_on_threads(files):
     df = pd.DataFrame()
     files_bytes = []
 
     for cv in files:
-        print(cv.name)
-        if cv.name.split('.')[-1] == 'pdf':
-            pdf_file = io.BytesIO(cv.read())
-            cleaned_text = read_pdf(pdf_file)
-            files_bytes.append(pdf_file)
-
-        elif cv.name.split('.')[-1] == 'docx' or cv.split('.')[-1] == 'doc':
-            docx_file = io.BytesIO(cv.read())
-            cleaned_text = read_docx(docx_file)
-            files_bytes.append(docx_file)
-
-        df = pd.concat([df, pd.DataFrame([cleaned_text.lower()], columns=['cv'])], ignore_index=True)
-        titles.append(cv.name)
-
-
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            print(cv.name)
+            titles.append(cv.name)
+            thread = executor.submit(get_files_content, cv)
+            result_value = thread.result()
+            files_bytes.append(result_value[1])
+            df = pd.concat([df, pd.DataFrame([result_value[0].lower()], columns=['cv'])], ignore_index=True)
+            
     df['title'] = titles
     df['bytes'] = files_bytes
 
@@ -126,27 +132,40 @@ keywords = st.text_area('Enter the keywords here...')
 contents = []
 scores = []
 
-df = pd.DataFrame()
+# df = pd.DataFrame()
 
-df = get_files_content(files)
+# if st.button('Get Results'):
+df = run_on_threads(files)
 clean_keywords = filter_text(keywords)
+
+
+
+def get_scores(cv, clean_keywords):
+    matrix = vectorizer.fit_transform([cv, clean_keywords])
+    scores = cosine_similarity(matrix)[0][1]
+
+    return scores
+
 
 if clean_keywords != '':
     for cv in df.iloc[:, 0].values.tolist():
-        matrix = vectorizer.fit_transform([cv, clean_keywords])
-        scores.append(cosine_similarity(matrix)[0][1]) 
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            thread = executor.submit(get_scores, cv, clean_keywords)
+            result_value = thread.result()
+            scores.append(result_value)
         
+
     df['scores'] = scores
     df['scores'] = df['scores'] * 100
-    
+
     record = show(df[['bytes', 'title', 'scores']].sort_values(by='scores', ascending=False).drop_duplicates())
     try:
         row = df[df['title']==record['title']]
         print(row)
     except:
             pass
-    
-    
+
+
     try:
         for file in files:
             if file.name == record['title']:
@@ -160,13 +179,5 @@ if clean_keywords != '':
 
 else:
     st.error('Enter some keywords...')
-
-
-
-
-
-
-
-
 
 
