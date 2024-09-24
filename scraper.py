@@ -61,3 +61,18 @@ for link in df['links'].values:
             'custom': 'ScraperBot/1.0',
         })
     responses.append(scraper.get(url).text)
+
+
+
+soup = BeautifulSoup(responses[0])
+
+phone_number = soup.find_all('a')[37]
+phone_number['href']
+
+rating = soup.find_all('div', class_='_y10azs')
+rate_list = [rate.text for rate in rating]
+rate_list
+
+no_rating = soup.find_all('div', class_='_jspzdm')
+no_rate_list = [no_rate.text for no_rate in no_rating]
+no_rate_list
